@@ -1,0 +1,34 @@
+Smart Solutions Büroservice - Projektübersicht
+
+Kunde: Smart Solutions Büroservice GmbH
+Standort: Münster, Deutschland
+Projektstart: Q4 2024
+
+Projektziele:
+- Automatisierung der E-Mail-Eingangsverarbeitung
+- Intelligente Dokumentenklassifizierung
+- Vertragsanalyse mit AI-Unterstützung
+- Rechnungsprüfung und -freigabe
+
+Technische Anforderungen:
+- Vollständig lokale Datenverarbeitung (kein Cloud-Upload)
+- DSGVO-konforme Speicherung aller Dokumente
+- Integration mit bestehendem DMS-System
+- Deutschsprachige Modelle für optimale Textverarbeitung
+
+Meilensteine:
+1. Infrastruktur-Setup (Qdrant, Ollama) - Abgeschlossen
+2. Dokumenten-Ingestion Pipeline - In Arbeit
+3. RAG-System für Vertragssuche - Geplant
+4. E-Mail-Klassifizierung Agent - Geplant
+5. Dashboard und Reporting - Geplant
+
+Ansprechpartner:
+- Projektleitung: TimeSkipCom
+- IT-Kontakt: Smart Solutions IT-Abteilung
+
+Nächste Schritte:
+Die Dokumenten-Ingestion Pipeline wird als nächstes implementiert. 
+Dabei werden PDF, Word und Excel Dokumente verarbeitet und in der 
+Vektordatenbank indexiert. Die semantische Suche ermöglicht dann 
+das schnelle Auffinden relevanter Vertragsinformationen.

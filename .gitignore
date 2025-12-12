@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Qdrant data
+qdrant_data/
+*.qdrant
+
+# Embedding cache
+.cache/
+*.cache
+models/
+
+# Environment variables
+.env
+.env.test
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Node.js (not needed for Python version)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Documentation tools
+codebase.md
+.docusaurus
+.aidigestignore
+.aider*
+
+# Temporary test directories
+tmp_*/
+
+# Legacy MongoDB-RAG files (will be removed)
+# These are kept in .gitignore in case cleanup is incomplete
+mongodb-rag-docs/
+test/*.js
+*.test.js
+jest-*.js
+release-alpha.js
+test-ingest.js
+static/
+favicon.ico
+.eslint.json
+bin/
+examples/
