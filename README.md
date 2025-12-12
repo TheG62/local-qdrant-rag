@@ -131,18 +131,23 @@ Der RAG-Agent kann als OpenAI-kompatibler API-Server gestartet werden, um mit To
 ### Server starten
 
 ```bash
-# Via CLI
-python -m src.cli serve --port 8000
+# Via CLI (findet automatisch freien Port)
+python -m src.cli serve
+
+# Mit bestimmtem Port
+python -m src.cli serve --port 9000
 
 # Oder direkt via uvicorn
-python -m uvicorn src.api:app --host 0.0.0.0 --port 8000
+python -m uvicorn src.api:app --host 0.0.0.0 --port 8001
 ```
+
+> **Hinweis:** Der Server prüft automatisch ob der gewünschte Port frei ist und sucht bei Bedarf einen freien Port. Default-Port ist 8001.
 
 ### OpenWebUI konfigurieren
 
 1. Öffne OpenWebUI Settings → Connections
 2. Füge eine neue OpenAI-Connection hinzu:
-   - **Base URL**: `http://localhost:8000/v1`
+   - **Base URL**: `http://localhost:PORT/v1` (PORT aus Server-Output)
    - **API Key**: beliebig (z.B. `local-rag`)
 3. Wähle das Model `local-rag` aus
 

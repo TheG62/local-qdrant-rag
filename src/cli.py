@@ -1718,6 +1718,47 @@ def health():
         sys.exit(1)
 
 
+def is_port_in_use(port: int, host: str = "0.0.0.0") -> bool:
+    """Prüft ob ein Port bereits belegt ist."""
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+            return False
+        except OSError:
+            return True
+
+
+def find_free_port(start_port: int = 8000, max_attempts: int = 100, host: str = "0.0.0.0") -> int:
+    """Findet einen freien Port ab start_port."""
+    for port in range(start_port, start_port + max_attempts):
+        if not is_port_in_use(port, host):
+            return port
+    raise RuntimeError(f"Kein freier Port gefunden zwischen {start_port} und {start_port + max_attempts}")
+
+
+def get_port_info(port: int) -> str | None:
+    """Versucht herauszufinden welcher Prozess einen Port belegt."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["lsof", "-i", f":{port}", "-P", "-n"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.stdout:
+            lines = result.stdout.strip().split("\n")
+            if len(lines) > 1:
+                # Parse second line (first is header)
+                parts = lines[1].split()
+                if len(parts) >= 1:
+                    return parts[0]  # Process name
+    except Exception:
+        pass
+    return None
+
+
 @cli.command()
 @click.option(
     "--host",
@@ -1726,33 +1767,73 @@ def health():
 )
 @click.option(
     "--port",
-    default=8000,
+    default=8001,
     type=int,
-    help="Port to run the server on",
+    help="Port to run the server on (default: 8001, auto-finds free port if busy)",
 )
 @click.option(
     "--reload",
     is_flag=True,
     help="Enable auto-reload for development",
 )
-def serve(host, port, reload):
+@click.option(
+    "--auto-port/--no-auto-port",
+    default=True,
+    help="Automatically find free port if specified port is busy (default: enabled)",
+)
+def serve(host, port, reload, auto_port):
     """Start the OpenAI-compatible API server.
     
     Startet einen API-Server der mit OpenWebUI, Continue.dev und anderen
     OpenAI-kompatiblen Tools funktioniert.
     
+    Der Server prüft automatisch ob der gewünschte Port frei ist und
+    sucht bei Bedarf einen freien Port.
+    
     Beispiel:
-        python -m src.cli serve --port 8000
+        python -m src.cli serve
+        python -m src.cli serve --port 9000
+        python -m src.cli serve --no-auto-port  # Fehler wenn Port belegt
     
     Dann in OpenWebUI:
         Settings → Connections → OpenAI API
-        Base URL: http://localhost:8000/v1
+        Base URL: http://localhost:PORT/v1
     """
+    click.echo("🔍 Prüfe verfügbare Ports...")
+    
+    # Prüfe ob gewünschter Port frei ist
+    original_port = port
+    if is_port_in_use(port, host):
+        process_name = get_port_info(port)
+        if process_name:
+            click.echo(f"⚠️  Port {port} ist belegt durch: {process_name}")
+        else:
+            click.echo(f"⚠️  Port {port} ist bereits belegt")
+        
+        if auto_port:
+            # Finde freien Port
+            try:
+                port = find_free_port(start_port=original_port + 1, host=host)
+                click.echo(f"✅ Verwende freien Port: {port}")
+            except RuntimeError as e:
+                click.echo(f"❌ {e}", err=True)
+                sys.exit(1)
+        else:
+            click.echo("❌ Port belegt und --no-auto-port gesetzt", err=True)
+            click.echo(f"   Versuche: python -m src.cli serve --port {original_port + 1}", err=True)
+            sys.exit(1)
+    else:
+        click.echo(f"✅ Port {port} ist frei")
+    
+    click.echo()
     click.echo("🚀 Starte Local Qdrant RAG API Server...")
     click.echo(f"   Host: {host}")
     click.echo(f"   Port: {port}")
-    click.echo(f"   OpenAPI Docs: http://{host}:{port}/docs")
-    click.echo(f"   OpenWebUI URL: http://{host}:{port}/v1")
+    
+    # Zeige localhost URL statt 0.0.0.0 für bessere Usability
+    display_host = "localhost" if host == "0.0.0.0" else host
+    click.echo(f"   OpenAPI Docs: http://{display_host}:{port}/docs")
+    click.echo(f"   OpenWebUI URL: http://{display_host}:{port}/v1")
     click.echo()
     
     try:
