@@ -1718,5 +1718,54 @@ def health():
         sys.exit(1)
 
 
+@cli.command()
+@click.option(
+    "--host",
+    default="0.0.0.0",
+    help="Host to bind the server to",
+)
+@click.option(
+    "--port",
+    default=8000,
+    type=int,
+    help="Port to run the server on",
+)
+@click.option(
+    "--reload",
+    is_flag=True,
+    help="Enable auto-reload for development",
+)
+def serve(host, port, reload):
+    """Start the OpenAI-compatible API server.
+    
+    Startet einen API-Server der mit OpenWebUI, Continue.dev und anderen
+    OpenAI-kompatiblen Tools funktioniert.
+    
+    Beispiel:
+        python -m src.cli serve --port 8000
+    
+    Dann in OpenWebUI:
+        Settings → Connections → OpenAI API
+        Base URL: http://localhost:8000/v1
+    """
+    click.echo("🚀 Starte Local Qdrant RAG API Server...")
+    click.echo(f"   Host: {host}")
+    click.echo(f"   Port: {port}")
+    click.echo(f"   OpenAPI Docs: http://{host}:{port}/docs")
+    click.echo(f"   OpenWebUI URL: http://{host}:{port}/v1")
+    click.echo()
+    
+    try:
+        from .api import run_server
+        run_server(host=host, port=port, reload=reload)
+    except ImportError as e:
+        click.echo(f"❌ API-Dependencies fehlen: {e}", err=True)
+        click.echo("   Installiere mit: pip install fastapi uvicorn", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"❌ Server-Fehler: {e}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli()

@@ -14,6 +14,7 @@ Ein vollständig lokaler RAG-Assistent (Retrieval Augmented Generation) für deu
 - 📄 **Docling-powered** - IBM's Document Understanding für komplexe Dokumente
 - 🔍 **Hybrid Search** - Kombiniert semantische Suche mit Volltextsuche (RRF-Merge)
 - ⚡ **Streaming** - Antworten werden Wort für Wort angezeigt
+- 🌐 **OpenAI-kompatible API** - Integration mit OpenWebUI, Continue.dev und anderen Tools
 
 ### Dokumentverarbeitung
 | Format | Features |
@@ -123,6 +124,65 @@ Erkläre mir die RAG-Architektur
 Fasse den Vertrag zusammen
 ```
 
+## 🌐 API Server (OpenWebUI Integration)
+
+Der RAG-Agent kann als OpenAI-kompatibler API-Server gestartet werden, um mit Tools wie **OpenWebUI**, **Continue.dev** oder anderen OpenAI-kompatiblen Clients zu funktionieren.
+
+### Server starten
+
+```bash
+# Via CLI
+python -m src.cli serve --port 8000
+
+# Oder direkt via uvicorn
+python -m uvicorn src.api:app --host 0.0.0.0 --port 8000
+```
+
+### OpenWebUI konfigurieren
+
+1. Öffne OpenWebUI Settings → Connections
+2. Füge eine neue OpenAI-Connection hinzu:
+   - **Base URL**: `http://localhost:8000/v1`
+   - **API Key**: beliebig (z.B. `local-rag`)
+3. Wähle das Model `local-rag` aus
+
+### API Endpoints
+
+| Endpoint | Methode | Beschreibung |
+|----------|---------|--------------|
+| `/v1/chat/completions` | POST | OpenAI-kompatibler Chat (mit RAG) |
+| `/v1/models` | GET | Verfügbare Modelle |
+| `/v1/rag/search` | POST | Direkte RAG-Suche ohne LLM |
+| `/v1/rag/collections` | GET | Qdrant Collections auflisten |
+| `/health` | GET | Health-Check |
+| `/docs` | GET | Swagger UI Dokumentation |
+
+### Beispiel: Chat mit cURL
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "local-rag",
+    "messages": [{"role": "user", "content": "Was ist RAG?"}],
+    "stream": false
+  }'
+```
+
+### RAG deaktivieren
+
+Falls du die RAG-Suche für einzelne Anfragen deaktivieren möchtest:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "local-rag",
+    "messages": [{"role": "user", "content": "Hallo!"}],
+    "use_rag": false
+  }'
+```
+
 ## ⚙️ Konfiguration
 
 Alle Einstellungen über `.env` oder Umgebungsvariablen:
@@ -167,6 +227,7 @@ Chat-Eingabe
 - **Embeddings**: BGE-M3 (multilingual, 1024 dim)
 - **Dokumente**: Docling (IBM)
 - **Suche**: Hybrid RRF (Semantic + Fulltext)
+- **API**: FastAPI (OpenAI-kompatibel)
 
 ## 💻 Hardware-Empfehlungen
 
@@ -198,6 +259,7 @@ python system_health_check.py
 local-qdrant-rag/
 ├── src/
 │   ├── cli.py                  # CLI + Chat Interface
+│   ├── api.py                  # OpenAI-kompatible REST API
 │   ├── settings.py             # Konfiguration
 │   ├── tools.py                # Search Tools
 │   ├── ingestion/              # Docling Pipeline

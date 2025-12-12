@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] - 2025-12-12
 
 ### Added
+- **OpenAI-kompatible REST API** (`src/api.py`):
+  - Neuer `python -m src.cli serve` Befehl zum Starten des API-Servers
+  - OpenAI-kompatibler `/v1/chat/completions` Endpoint mit automatischer RAG-Integration
+  - `/v1/models` Endpoint für Model-Auflistung
+  - `/v1/rag/search` Endpoint für direkte RAG-Suche ohne LLM
+  - `/v1/rag/collections` Endpoint für Collection-Management
+  - `/health` Endpoint für Health-Check (Qdrant + Ollama Status)
+  - Swagger UI Dokumentation unter `/docs`
+  - Streaming-Support für Echtzeit-Antworten
+  - CORS-Middleware für Cross-Origin-Zugriff
+  - Optional `use_rag: false` Parameter um RAG zu deaktivieren
+- **OpenWebUI Integration**: 
+  - Vollständige Kompatibilität mit OpenWebUI, Continue.dev und anderen OpenAI-kompatiblen Clients
+  - Dokumentation für OpenWebUI-Konfiguration in README
+- **Neue Dependencies**: `fastapi>=0.104.0` und `uvicorn>=0.24.0` hinzugefügt
+- **Neuer Script-Eintrag**: `local-rag-serve` in pyproject.toml
+
 - **Pattern-Verbesserungen und Sicherheit**:
   - Verbesserte Pfad-Extraktion mit Priorität für absolute Pfade
   - Path Traversal Erkennung: `/Users/../../../etc/passwd` wird vollständig erkannt
