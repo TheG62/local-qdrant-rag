@@ -1,0 +1,158 @@
+🚀 SKIPPER-0 - COOLIFY DEPLOYMENT GUIDE
+
+════════════════════════════════════════════════════════
+MISSION: Learn to deploy apps on Coolify
+════════════════════════════════════════════════════════
+
+VORAUSSETZUNG:
+✅ Güney hat Coolify auf Mac Studio installiert
+✅ Coolify läuft auf: http://localhost:8000
+✅ Du hast Zugriff auf die VM via SSH
+
+════════════════════════════════════════════════════════
+
+AUFGABE 1: FIRST DEPLOYMENT (Tag 1)
+────────────────────────────────────────────────────────
+
+Deploye eine einfache Test-App!
+
+SCHRITTE:
+
+1. Öffne Coolify UI:
+   http://localhost:8000
+
+2. Erstelle neues Projekt:
+   - Click "New Project"
+   - Name: "Test Apps"
+
+3. Deploy Hello World:
+   - Click "Add Resource" → "Application"
+   - Source: "Public Repository"
+   - Git URL: https://github.com/vercel/next.js/tree/canary/examples/hello-world
+   - Branch: canary
+   - Build Pack: Nixpacks (Auto-detect)
+   - Click "Deploy"
+
+4. Warte auf Deployment (~2-3 min)
+
+5. Öffne die App (Coolify zeigt dir die URL)
+
+6. Screenshot machen!
+
+7. Status-Report an Skipper:
+   "✅ First Deployment erfolgreich! [Screenshot]"
+
+════════════════════════════════════════════════════════
+
+AUFGABE 2: DATABASE DEPLOYMENT (Tag 2)
+────────────────────────────────────────────────────────
+
+Deploye PostgreSQL Database!
+
+SCHRITTE:
+
+1. In Coolify UI:
+   - Click "Add Resource" → "Database"
+   - Type: PostgreSQL
+   - Version: Latest
+   - Name: test-db
+
+2. Click "Deploy"
+
+3. Warte auf Start (~1 min)
+
+4. Notiere Connection-String:
+   - Host: localhost
+   - Port: [von Coolify angezeigt]
+   - User: [von Coolify angezeigt]
+   - Password: [von Coolify angezeigt]
+
+5. Test Connection:
+   ssh coolify-server
+   docker ps | grep postgres
+   
+6. Status-Report an Skipper:
+   "✅ Database deployed! Connection-String: [...]"
+
+════════════════════════════════════════════════════════
+
+AUFGABE 3: BACKUP-TEST (Tag 3)
+────────────────────────────────────────────────────────
+
+Teste Backup-Funktionalität!
+
+SCHRITTE:
+
+1. In Coolify UI → Deine Database
+
+2. Gehe zu "Backups"
+
+3. Click "Create Backup Now"
+
+4. Warte auf Completion
+
+5. Verify Backup exists
+
+6. Status-Report an Skipper:
+   "✅ Backup funktioniert!"
+
+════════════════════════════════════════════════════════
+
+BONUS-AUFGABE: DEPLOY EIGENE APP
+────────────────────────────────────────────────────────
+
+Deploye eine deiner eigenen Apps!
+
+Vorschläge:
+- PES-Converter (refactored Version)
+- Ein Python-Script als Web-API
+- Eine React-App
+
+SCHRITTE:
+
+1. Push Code zu GitHub (falls noch nicht)
+
+2. In Coolify:
+   - Add Resource → Application
+   - Source: Dein GitHub Repo
+   - Configure Build
+   - Deploy!
+
+3. Teste ob es funktioniert
+
+4. Status-Report + Screenshot!
+
+════════════════════════════════════════════════════════
+
+LEARNING GOALS
+────────────────────────────────────────────────────────
+
+Nach diesen Aufgaben weisst du:
+✅ Wie man Apps deployed
+✅ Wie man Databases managed
+✅ Wie Backups funktionieren
+✅ Wie man Logs checkt
+✅ Wie man Deployments überwacht
+
+→ Das ist Production-Level DevOps! 🚀
+
+════════════════════════════════════════════════════════
+
+HILFE GEBRAUCHT?
+
+SSH Commands:
+- VM betreten: ssh coolify-server
+- Docker Status: docker ps
+- Coolify Logs: docker logs coolify
+- App Logs: [in Coolify UI]
+
+Probleme?
+→ Report an Skipper mit Details!
+
+════════════════════════════════════════════════════════
+
+DEADLINE: 3 Tage
+
+Los geht's! 💪
+
+- Skipper (Big Brother)

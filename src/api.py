@@ -84,8 +84,8 @@ class ChatCompletionRequest(BaseModel):
     stream: bool = False
     temperature: float = 0.7
     max_tokens: Optional[int] = None
-    # RAG-spezifische Optionen
-    use_rag: bool = Field(default=True, description="RAG-Suche aktivieren")
+    # RAG-spezifische Optionen (werden ignoriert wenn nicht gesetzt)
+    use_rag: Optional[bool] = Field(default=None, description="RAG-Suche aktivieren")
     top_k: Optional[int] = Field(default=None, description="Anzahl Suchergebnisse")
 
 
@@ -221,10 +221,13 @@ async def chat_completions(request: ChatCompletionRequest):
     logger.info(f"[{request_id}] Query: {query[:100]}...")
     
     # RAG-Suche durchführen (falls aktiviert)
+    # Default: RAG ist aktiviert, außer explizit deaktiviert
+    use_rag = request.use_rag if request.use_rag is not None else True
+    
     context = ""
     sources = []
     
-    if request.use_rag:
+    if use_rag:
         try:
             retrieval = get_retrieval()
             top_k = request.top_k or settings.retrieval.top_k
@@ -270,7 +273,7 @@ Antworte basierend auf dem obigen Kontext:"""
             try:
                 for token in ollama.generate_stream(
                     prompt=augmented_prompt,
-                    system_prompt=RAG_SYSTEM_PROMPT if request.use_rag else None,
+                    system_prompt=RAG_SYSTEM_PROMPT if use_rag else None,
                     context=history,
                 ):
                     chunk = {
@@ -322,13 +325,13 @@ Antworte basierend auf dem obigen Kontext:"""
         try:
             response_text = ollama.generate(
                 prompt=augmented_prompt,
-                system_prompt=RAG_SYSTEM_PROMPT if request.use_rag else None,
+                system_prompt=RAG_SYSTEM_PROMPT if use_rag else None,
                 context=history,
                 stream=False,
             )
             
             # Füge Quellen-Info hinzu wenn gewünscht
-            if sources and request.use_rag:
+            if sources and use_rag:
                 response_text += f"\n\n📚 Quellen: {', '.join(sources[:3])}"
             
             return ChatCompletionResponse(
@@ -422,6 +425,64 @@ async def list_rag_collections():
         return {
             "collections": result,
             "current": settings.qdrant.collection_name,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/test/openwebui")
+async def test_openwebui():
+    """
+    Test-Endpoint für OpenWebUI-Kompatibilität.
+    
+    Gibt alle wichtigen Informationen zurück, die für die Konfiguration
+    in OpenWebUI benötigt werden.
+    """
+    try:
+        # Prüfe Services
+        health_status = {
+            "status": "ok",
+            "rag_enabled": True,
+            "ollama": "unknown",
+            "qdrant": "unknown",
+        }
+        
+        # Qdrant
+        try:
+            client = get_qdrant_client()
+            collections = client.get_collections()
+            health_status["qdrant"] = "ok"
+            health_status["collections"] = len(collections.collections)
+        except Exception as e:
+            health_status["qdrant"] = f"error: {str(e)}"
+        
+        # Ollama
+        try:
+            provider = get_ollama()
+            test = provider.generate("test", stream=False)
+            health_status["ollama"] = "ok"
+        except Exception as e:
+            health_status["ollama"] = f"error: {str(e)}"
+        
+        # Models
+        models_response = await list_models()
+        
+        return {
+            "openwebui_compatible": True,
+            "health": health_status,
+            "models": models_response.dict(),
+            "configuration": {
+                "base_url": "http://localhost:PORT/v1",
+                "api_key": "any (not validated)",
+                "model": "local-rag",
+                "note": "Replace PORT with actual port from server output"
+            },
+            "endpoints": {
+                "chat": "/v1/chat/completions",
+                "models": "/v1/models",
+                "health": "/health",
+                "docs": "/docs"
+            }
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

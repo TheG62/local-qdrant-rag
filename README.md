@@ -324,6 +324,54 @@ python -c "from docling.document_converter import DocumentConverter; DocumentCon
 - `CHUNK_SIZE` reduzieren
 - `TOP_K` reduzieren
 
+### OpenWebUI Verbindungsprobleme
+
+**Problem: "Connection refused" oder "Model not found"**
+
+1. **Prüfe ob der API-Server läuft:**
+   ```bash
+   curl http://localhost:8001/health
+   # Sollte {"status":"ok",...} zurückgeben
+   ```
+
+2. **Prüfe die Base URL in OpenWebUI:**
+   - Base URL muss sein: `http://localhost:PORT/v1` (mit `/v1` am Ende!)
+   - PORT ist der Port aus dem Server-Output (z.B. 8001)
+   - **WICHTIG:** Nicht `http://localhost:8001` sondern `http://localhost:8001/v1`
+
+3. **Prüfe ob das Model verfügbar ist:**
+   ```bash
+   curl http://localhost:8001/v1/models
+   # Sollte "local-rag" in der Liste sein
+   ```
+
+4. **Teste die API direkt:**
+   ```bash
+   curl http://localhost:8001/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer test" \
+     -d '{
+       "model": "local-rag",
+       "messages": [{"role": "user", "content": "test"}]
+     }'
+   ```
+
+5. **Häufige Fehler:**
+   - ❌ Base URL: `http://localhost:8001` → ✅ `http://localhost:8001/v1`
+   - ❌ Port falsch → Prüfe Server-Output für tatsächlichen Port
+   - ❌ Server nicht gestartet → `python -m src.cli serve`
+   - ❌ Falsches Model → Muss `local-rag` sein (nicht `qwen2.5:32b`)
+
+6. **CORS-Probleme:**
+   - Die API hat CORS aktiviert (`allow_origins=["*"]`)
+   - Falls trotzdem Probleme: Prüfe Browser-Console für CORS-Fehler
+   - Stelle sicher, dass OpenWebUI und API-Server auf demselben Host laufen
+
+7. **Streaming-Probleme:**
+   - OpenWebUI nutzt standardmäßig Streaming
+   - Falls Probleme: Prüfe Server-Logs für Fehler
+   - Teste mit `"stream": false` in der API direkt
+
 ## 📝 Changelog
 
 Siehe [CHANGELOG.md](CHANGELOG.md) für alle Änderungen.
