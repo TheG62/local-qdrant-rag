@@ -1,0 +1,20 @@
+{
+  "name": "visual-canvas-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Visuelles Canvas- und Kollaborationswerkzeug (Milanote-orientierter, DSGVO-konformer Klon) — MVP-Monorepo gemaess Lasten-/Pflichtenheft v1.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:server": "pnpm --filter @vct/server dev",
+    "dev:web": "pnpm --filter @vct/web dev",
+    "build": "pnpm -r build",
+    "start": "pnpm --filter @vct/server start"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "license": "MIT"
+}
